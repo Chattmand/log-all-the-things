@@ -2,17 +2,17 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const d = new Date();
-
+const csv=require('csvtojson')
 
 app.use((req, res, next) => {
 // write your logging code here
-const agent = req.header('User-Agent');
-const method = req.method;
-const time = d.toISOString();
-const resource = req.path;
-const version = ('HTTP/' + req.httpVersion);
-const status = 200;
-let data = agent + ',' + time + ',' + method + ',' + resource + ',' + version + ',' + status + '\n';
+const Agent = req.headers['user-agent'].replace(/,/,'');
+const Method = req.method;
+const Time = d.toISOString();
+const Resource = req.path;
+const Version = ('HTTP/' + req.httpVersion);
+const Status = 200;
+let data = Agent + ',' +Time + ',' + Method + ',' + Resource + ',' + Version + ',' + Status + '\n';
 //console.log(req)
 console.log(data);
 
@@ -22,15 +22,47 @@ fs.appendFile('./server/log.csv', data , 'utf8',
     if (err) throw err;
     next()
   });
-
-//next();
+app.get('/',(req, res)=>{
 // write your code to respond "ok" here
 res.send('ok');
-});
+})
 
-app.get('/', (req, res) => {
+app.get('/logs', (req, res) => {
 // write your code to return a json object containing the log data here
-//const json
-});
+//const csvFilePath= '/log';
+fs.readFile( './server/log.csv', 'utf8' , function(err, data){
+    
+    if(err){
+        throw err;
+    }
+    let obj = '['
+    let lines = data.split('\n')
+    console.log('lines', lines)
+    let items = undefined
+    for(let i = 1; i < lines.length; i++){
+        if(lines[i].length > 2){
+            items = lines[i].split(",");
+            obj += '{' +
+             '"Agent":"' + items[0] + '",'+
+             '"Time":"' + items[1] +  '",' + 
+             '"Method":"' + items[2] + '",' + 
+             '"Resource":"' + items[3] +'",' + 
+             '"Version":"' + items[4] +'",' + 
+             '"Status":"' + items[5] +'"' +
+        '}'
+        }
+       
+    if (i < lines.length - 2){
+        obj += ','
+    }
+    }
+    obj +=']'
+    res.json(JSON.parse(obj))
+    // const content = data;
+    // console.log(content);
+    // processFile(content);
+})
+})
+ });
 
 module.exports = app;
