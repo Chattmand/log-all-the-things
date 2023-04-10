@@ -5,7 +5,6 @@ const d = new Date();
 const csv=require('csvtojson')
 
 app.use((req, res, next) => {
-// write your logging code here
 const Agent = req.headers['user-agent'].replace(/,/,'');
 const Method = req.method;
 const Time = d.toISOString();
@@ -13,7 +12,6 @@ const Resource = req.path;
 const Version = ('HTTP/' + req.httpVersion);
 const Status = 200;
 let data = Agent + ',' +Time + ',' + Method + ',' + Resource + ',' + Version + ',' + Status + '\n';
-//console.log(req)
 console.log(data);
 
 
@@ -23,13 +21,10 @@ fs.appendFile('./server/log.csv', data , 'utf8',
     next()
   });
 app.get('/',(req, res)=>{
-// write your code to respond "ok" here
 res.send('ok');
 })
 
 app.get('/logs', (req, res) => {
-// write your code to return a json object containing the log data here
-//const csvFilePath= '/log';
 fs.readFile( './server/log.csv', 'utf8' , function(err, data){
     
     if(err){
@@ -58,9 +53,7 @@ fs.readFile( './server/log.csv', 'utf8' , function(err, data){
     }
     obj +=']'
     res.json(JSON.parse(obj))
-    // const content = data;
-    // console.log(content);
-    // processFile(content);
+    
 })
 })
  });
